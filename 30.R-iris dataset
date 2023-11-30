@@ -1,0 +1,29 @@
+# Load required library
+library(caTools)
+library(nnet)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Load iris dataset
+data(iris)
+
+# Select only the relevant columns
+iris_subset <- iris[, c("Petal.Length", "Petal.Width", "Species")]
+
+# Create a train-test split (80% train, 20% test)
+split <- sample.split(iris_subset$Species, SplitRatio = 0.8)
+train_data <- subset(iris_subset, split == TRUE)
+test_data <- subset(iris_subset, split == FALSE)
+
+# Create logistic regression model
+log_reg_model <- multinom(Species ~ Petal.Length + Petal.Width, data = train_data)
+
+# Predict probability on test data
+test_data$predicted_probabilities <- predict(log_reg_model, newdata = test_data, type = "probs")
+
+# Create confusion matrix
+conf_matrix <- table(test_data$Species, colnames(test_data$predicted_probabilities)[apply(test_data$predicted_probabilities, 1, which.max)])
+
+# Print confusion matrix
+print(conf_matrix)
